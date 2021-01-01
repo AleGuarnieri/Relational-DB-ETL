@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS songplays
 (
     songplay_id SERIAL PRIMARY KEY, 
     start_time DATE,
-    user_id INT, 
+    user_id INT NOT NULL, 
     level VARCHAR, 
     song_id VARCHAR, 
     artist_id VARCHAR, 
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS songs
 (
     song_id VARCHAR PRIMARY KEY,
     title VARCHAR, 
-    artist_id VARCHAR, 
+    artist_id VARCHAR NOT NULL, 
     year INT, 
     duration FLOAT
 );
@@ -72,8 +72,8 @@ CREATE TABLE IF NOT EXISTS time
 # INSERT RECORDS
 
 songplay_table_insert = ("""
-INSERT INTO songplays (songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)
-    VALUES (DEFAULT, %s, %s, %s, %s, %s, %s, %s, %s)
+INSERT INTO songplays (start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     ON CONFLICT DO NOTHING;
 
 """)
@@ -81,7 +81,7 @@ INSERT INTO songplays (songplay_id, start_time, user_id, level, song_id, artist_
 user_table_insert = ("""
 INSERT INTO users (user_id, first_name, last_name, gender, level)
     VALUES (%s, %s, %s, %s, %s)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (user_id) DO UPDATE set level = EXCLUDED.level
 """)
 
 song_table_insert = ("""

@@ -14,14 +14,14 @@ perform data analysis.
 An ETL process was put in place in order to extract, transform and load the data from the surce datasets into the 5 final tables.
 
 ## Details
-The source datasets are a subset of a public dataset available in public S3 of AWS "s3a://udacity-dend/". (datasets are not loaded in this repository)
+The source datasets are a subset of a public dataset available in a S3 bucket of AWS "s3a://udacity-dend/". **(datasets are not loaded in this repository)**
 
 ## File Description 
-create_tables.py: it creates the "sparkify" database used for creating the data model and performing the ETL process. it also call the sql_queries.py file to drop the tables if they exists in the database and to create them again, following the star schema descigned for this project.
+```create_tables.py```: it creates the "sparkify" database used for creating the data model and performing the ETL process. it also call the sql_queries.py file to drop the tables if they exists in the database and to create them again, following the star schema designed for this project.
 
-sql_queries.py: it is used by create_tables to drop and create the tables of the data model
+```sql_queries.py```: it is used by create_tables to drop and create the tables of the data model
 
-etl.py: it contains the functions necessary to extract, tranform and load the data from the source datasets to the 5 final tables of the star schema
+```etl.py```: it contains the functions necessary to extract, tranform and load the data from the source datasets to the 5 final tables of the star schema
 
 ## Acknowledgements
 Udacity provided the course material necessary to implement the project

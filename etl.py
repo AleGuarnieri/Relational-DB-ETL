@@ -6,19 +6,47 @@ from sql_queries import *
 
 
 def process_song_file(cur, filepath):
+    """
+    song data are first extracted into a dataframe, 
+    then the right columns are selected and the right
+    queries are executed to insert them into 
+    songs and artists tables.
+    
+    Arguments:
+        cur: cursor for database connection
+        filepath: path to the file to extract
+    
+    Returns:
+        None
+    """
     # open song file
     df = pd.read_json(filepath, lines=True)
 
     # insert song record
-    song_data = list(df[['song_id', 'title', 'artist_id', 'year', 'duration']].values[0])
+    song_data = list(df[['song_id', 'title', 'artist_id',
+                         'year', 'duration']].values[0])
     cur.execute(song_table_insert, song_data)
     
     # insert artist record
-    artist_data = list(df[['artist_id', 'artist_name', 'artist_location', 'artist_latitude', 'artist_longitude']].values[0])
+    artist_data = list(df[['artist_id', 'artist_name', 'artist_location',
+                           'artist_latitude', 'artist_longitude']].values[0])
     cur.execute(artist_table_insert, artist_data)
 
 
 def process_log_file(cur, filepath):
+    """
+    log data are first extracted into a dataframe, 
+    then they are filtered to get only "play" logs.
+    Data are then manipulated to be correctly inserted 
+    into time, users and songplays tables.
+    
+    Arguments:
+        cur: cursor for database connection
+        filepath: path to the file to extract
+    
+    Returns:
+        None
+    """
     # open log file
     df = pd.read_json(filepath, lines=True)
 
@@ -29,8 +57,10 @@ def process_log_file(cur, filepath):
     t = pd.to_datetime(df['ts'], unit='ms')
     
     # insert time data records
-    time_data = [t, t.dt.hour, t.dt.day, t.dt.weekofyear, t.dt.month, t.dt.year, t.dt.dayofweek]
-    column_labels = ['start_time', 'hour', 'day', 'week', 'month', 'year', 'weekday']
+    time_data = [t, t.dt.hour, t.dt.day, t.dt.weekofyear, t.dt.month,
+                 t.dt.year, t.dt.dayofweek]
+    column_labels = ['start_time', 'hour', 'day', 'week', 'month',
+                     'year', 'weekday']
     time_df = pd.DataFrame(dict(zip(column_labels, time_data)))
 
     for i, row in time_df.iterrows():
@@ -56,16 +86,33 @@ def process_log_file(cur, filepath):
             songid, artistid = None, None
 
         # insert songplay record
-        songplay_data = (pd.to_datetime(row.ts, unit='ms'), row.userId, row.level, songid, artistid, row.sessionId, row.location, row.userAgent)
+        songplay_data = (pd.to_datetime(row.ts, unit='ms'), row.userId, 
+                         row.level, songid, artistid, row.sessionId,
+                         row.location, row.userAgent)
         cur.execute(songplay_table_insert, songplay_data)
 
 
 def process_data(cur, conn, filepath, func):
+    """
+    filepaths to each json file contained in the 
+    two source datasets are created and passed to
+    the functions where data are actually processed.
+    Each file is processed one by one.
+    
+    Arguments:
+        cur: cursor for database connection
+        conn: connection to the database
+        filepath: path to the file's directory to extract
+        func: function name to use for processing data
+    
+    Returns:
+        None
+    """
     # get all files matching extension from directory
     all_files = []
     for root, dirs, files in os.walk(filepath):
-        files = glob.glob(os.path.join(root,'*.json'))
-        for f in files :
+        files = glob.glob(os.path.join(root, '*.json'))
+        for f in files:
             all_files.append(os.path.abspath(f))
 
     # get total number of files found
@@ -80,7 +127,12 @@ def process_data(cur, conn, filepath, func):
 
 
 def main():
-    conn = psycopg2.connect("host=127.0.0.1 dbname=sparkifydb user=student password=student")
+    """
+    connection to the existing database is created,
+    functions to perform ETL are called.
+    """
+    conn = psycopg2.connect("""host=127.0.0.1 dbname=sparkifydb
+                            user=student password=student""")
     cur = conn.cursor()
 
     process_data(cur, conn, filepath='data/song_data', func=process_song_file)
